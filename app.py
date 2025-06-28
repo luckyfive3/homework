@@ -76,3 +76,44 @@ def setup_knowledge_base_tool(pdf_path: str):
             description="知识库工具 (初始化失败)。当你需要从项目文档或特定知识库中获取信息时使用此工具。输入是你想要查询的问题。",
             func=lambda x: f"错误：知识库工具初始化失败: {e}"
         )
+
+# 2. API 工具：天气查询
+def get_current_weather(location: str) -> str:
+    """
+    获取指定地点的当前天气信息。
+    """
+    if not OPENWEATHERMAP_API_KEY:
+        return "OpenWeatherMap API Key 未配置，无法查询天气。"
+
+    base_url = "http://api.openweathermap.org/data/2.5/weather"
+    params = {
+        "q": location,
+        "appid": OPENWEATHERMAP_API_KEY,
+        "units": "metric" # 获取摄氏度
+    }
+    try:
+        response = requests.get(base_url, params=params)
+        response.raise_for_status() # Raises HTTPError for bad responses (4xx or 5xx)
+        data = response.json()
+
+        if data.get("cod") == 200:
+            main_info = data.get("main", {})
+            weather_info = data.get("weather", [{}])[0]
+            wind_info = data.get("wind", {})
+
+            return (
+                f"Location: {data.get('name')}, {data.get('sys', {}).get('country')}\n"
+                f"Temperature: {main_info.get('temp')}°C\n"
+                f"Feels Like: {main_info.get('feels_like')}°C\n"
+                f"Humidity: {main_info.get('humidity')}%\n"
+                f"Weather: {weather_info.get('description')}\n"
+                f"Wind Speed: {wind_info.get('speed')} m/s"
+            )
+        else:
+            return f"无法获取 {location} 的天气信息: {data.get('message', '未知错误')}"
+    except requests.exceptions.RequestException as e:
+        return f"查询天气时发生网络错误: {e}"
+    except json.JSONDecodeError:
+        return "API响应格式错误，无法解析天气信息。"
+    except Exception as e:
+        return f"查询天气时发生未知错误: {e}"

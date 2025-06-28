@@ -117,3 +117,38 @@ def get_current_weather(location: str) -> str:
         return "API响应格式错误，无法解析天气信息。"
     except Exception as e:
         return f"查询天气时发生未知错误: {e}"
+
+# 3. 本地函数工具：数据排序分析
+def analyze_and_sort_data(data_str: str, sort_order: str = "ascending") -> str:
+    """
+    接收一个逗号分隔的数字字符串，将其转换为列表，进行排序，并提供基本统计分析。
+    Args:
+        data_str (str): 逗号分隔的数字字符串，例如 "10,5,20,15,8"。
+        sort_order (str): 排序顺序，可选 "ascending" (升序) 或 "descending" (降序)。
+    Returns:
+        str: 排序后的数据和基本统计信息。
+    """
+    try:
+        data_list = [float(x.strip()) for x in data_str.split(',')]
+    except ValueError:
+        return "输入数据格式不正确，请提供逗号分隔的数字。"
+
+    if not data_list:
+        return "输入数据为空。"
+
+    if sort_order.lower() == "ascending":
+        sorted_data = sorted(data_list)
+    elif sort_order.lower() == "descending":
+        sorted_data = sorted(data_list, reverse=True)
+    else:
+        return "排序顺序无效，请选择 'ascending' 或 'descending'。"
+
+    df = pd.DataFrame(sorted_data, columns=["values"])
+    description = df.describe().to_string() # 获取统计描述
+
+    return (
+        f"原始数据: {data_str}\n"
+        f"排序方式: {sort_order}\n"
+        f"排序后数据: {sorted_data}\n"
+        f"统计分析:\n{description}"
+    )

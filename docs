@@ -1,0 +1,3 @@
+mkdir docs
+# 将你的PDF文档（例如：项目说明、公司规章等）放入此文件夹，并命名为 your_project_document.pdf
+# 例如：docs/your_project_document.pdf
